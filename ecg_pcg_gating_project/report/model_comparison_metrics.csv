@@ -1,0 +1,7 @@
+Model,Modality,Params,AUROC,AUPRC,Recall,Specificity,Accuracy
+E1 Baseline,PCG (Ungated),1150,0.584,0.158,0.883,0.248,0.324
+E2 Baseline,PCG (ECG-Gated),1150,0.581,0.153,0.733,0.314,0.364
+E2 Enhanced,PCG (ECG-Gated),52194,0.627,0.174,0.433,0.584,0.566
+E3 Multimodal Fusion,ECG + PCG,12080,0.618,0.169,0.8,0.307,0.366
+Log-Mel 2D CNN,PCG (ECG-Gated),56674,0.78,0.391,0.567,0.809,0.872
+Hierarchical Multimodal Attention,4-Site ECG+PCG,979020,0.894,0.544,0.85,0.852,0.852

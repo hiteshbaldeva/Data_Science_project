@@ -1,0 +1,19 @@
+{
+  "config": "config/enhanced.yaml",
+  "profile": null,
+  "data_root": null,
+  "external_root": null,
+  "device": null,
+  "seed": null,
+  "output_dir": null,
+  "verbose": false,
+  "experiment": "e2",
+  "dataset_name": "main",
+  "windows": null,
+  "run_name": "enhanced",
+  "folds": null,
+  "smoke": false,
+  "epochs": null,
+  "max_subjects": null,
+  "no_window_predictions": false
+}

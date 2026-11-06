@@ -1,0 +1,25 @@
+{
+  "model": "LogMelCNN",
+  "parameters": 56674,
+  "mean_threshold": 0.376,
+  "pooled_oof_metrics": {
+    "tn": 416,
+    "fp": 24,
+    "fn": 40,
+    "tp": 20,
+    "threshold": 0.376,
+    "n": 500,
+    "n_positive": 60,
+    "n_negative": 440,
+    "accuracy": 0.872,
+    "precision": 0.45454545454545453,
+    "recall_sensitivity": 0.3333333333333333,
+    "specificity": 0.9454545454545454,
+    "f1": 0.38461538461538464,
+    "balanced_accuracy": 0.6393939393939394,
+    "npv": 0.9122807017543859,
+    "roc_auc": 0.7797348484848485,
+    "pr_auc": 0.3907439133179788,
+    "brier": 0.0914926662778834
+  }
+}

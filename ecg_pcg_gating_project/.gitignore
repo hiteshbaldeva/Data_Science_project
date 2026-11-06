@@ -1,0 +1,46 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Test and type-checker caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local dataset, caches and generated signals.
+# Raw recordings are NEVER committed.  The README inside data/ is kept.
+data/*
+!data/README.md
+
+# Generated results, checkpoints, figures and logs.  Real experiment outputs
+# can be large; keep them outside version control and archive them separately.
+results/*
+!results/README.md
+# Keep the empty report folders in version control.
+!results/figures/
+!results/metrics/
+!results/checkpoints/
+!results/figures/.gitkeep
+!results/metrics/.gitkeep
+!results/checkpoints/.gitkeep
+results_synthetic/
+logs/
+*.log
+
+# Archives and editor / OS files
+*.zip
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/

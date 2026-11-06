@@ -1,0 +1,2 @@
+Cohort,Total_Subjects,Positives,Negatives,AUROC,AUPRC,Sensitivity_tau_0.20,Specificity_tau_0.20,Accuracy_tau_0.20
+community_scenario_external,120,5,115,0.9895652173913043,0.821111111111111,1.0,0.8260869565217391,0.8333333333333334

@@ -1,0 +1,7 @@
+kind,experiment,model,profile,parameters,input_length,source
+implemented,E1,pcg,paper_haar,1150,,C:\Users\Hitesh m\OneDrive\Desktop\new_ds_project\ecg_pcg_gating_project\results\paper_haar\e1\smoke
+implemented,E2,pcg,paper_haar,1150,,C:\Users\Hitesh m\OneDrive\Desktop\new_ds_project\ecg_pcg_gating_project\results\paper_haar\e2\smoke
+reference,,"Original paper, Configuration 5 (5 classes)",,1537,,Original paper Table IV; reconstructed layer-by-layer
+reference,,"Original paper, Configuration 5 (binary projection)",,1150,,"Same encoder, 128->2 fully connected head"
+reference,,LGC2-Net full (dataset paper),,41650000,,"HFrEF dataset paper, approximately 41.65 M parameters"
+reference,,LGC2-Net PCG-only branch (dataset paper),,25450000,,"HFrEF dataset paper, approximately 25.45 M parameters"

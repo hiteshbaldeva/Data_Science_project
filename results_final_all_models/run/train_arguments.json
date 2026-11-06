@@ -1,0 +1,19 @@
+{
+  "config": "C:\\Users\\Hitesh m\\OneDrive\\Desktop\\new_ds_project\\ecg_pcg_gating_project\\config\\default.yaml",
+  "profile": null,
+  "data_root": null,
+  "external_root": null,
+  "device": null,
+  "seed": null,
+  "output_dir": null,
+  "verbose": false,
+  "experiment": "e1",
+  "dataset_name": "main",
+  "windows": null,
+  "run_name": "run",
+  "folds": null,
+  "smoke": false,
+  "epochs": null,
+  "max_subjects": null,
+  "no_window_predictions": false
+}

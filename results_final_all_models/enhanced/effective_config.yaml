@@ -1,0 +1,192 @@
+project:
+  name: ecg_pcg_gating_project
+  seed: 42
+  device: auto
+  output_dir: results
+  deterministic: true
+data:
+  root: C:\Users\Hitesh m\Downloads\HFrEF_5_folds\HFrEF_5_folds
+  fallback_root: data/HFrEF_5_folds
+  external_root: C:\Users\Hitesh m\Downloads\HFrEF_community_scenario_test_set\HFrEF_community_scenario_test_set
+  cache_dir: data/cache
+  folds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  sites:
+  - APEX
+  - LLSB
+  - LUSB
+  - RUSB
+  modalities:
+  - ECG
+  - PCG
+  lvef_threshold_percent: 40.0
+  label_glob: '*label*.csv'
+  min_duration_seconds: 10.0
+  max_duration_seconds: 90.0
+  duration_tolerance_seconds: 0.25
+  expected_ecg_fs: 500
+  expected_pcg_fs: 4000
+  require_all_sites: false
+preprocessing:
+  profile: paper_haar
+  profiles:
+    paper_haar:
+      description: 'Original-paper-inspired: 1440 Hz + 2-level Haar DWT + 1.5 s windows'
+      pcg_target_fs: 1440
+      pcg_bandpass_hz:
+      - 20
+      - 400
+      pcg_filter_order: 5
+      pcg_filter_zero_phase: true
+      dwt_enabled: true
+      dwt_wavelet: haar
+      dwt_level: 2
+      dwt_keep: approximation
+      window_seconds: 1.5
+      hop_seconds: 0.75
+      normalization: train_global
+    hfref_2000:
+      description: 'HFrEF dataset paper: 2000 Hz + 25-400 Hz band-pass + 1.28 s windows'
+      pcg_target_fs: 2000
+      pcg_bandpass_hz:
+      - 25
+      - 400
+      pcg_filter_order: 5
+      pcg_filter_zero_phase: true
+      dwt_enabled: false
+      dwt_wavelet: haar
+      dwt_level: 2
+      dwt_keep: approximation
+      window_seconds: 1.28
+      hop_seconds: 0.64
+      normalization: train_global
+  ecg:
+    target_fs: 500
+    bandpass_hz:
+    - 5
+    - 25
+    fusion_bandpass_hz:
+    - 1
+    - 40
+    notch_hz: null
+    normalization: train_global
+gating:
+  method: paper_inspired
+  polarity: auto
+  window:
+    anchor: r_peak
+    pre_r_seconds: 0.25
+    pre_s1_seconds: 0.1
+    duration_seconds: 1.5
+    max_out_of_bounds_seconds: 0.0
+  min_rr_seconds: 0.3
+  max_rr_seconds: 1.5
+  min_heart_rate_bpm: 40
+  max_heart_rate_bpm: 200
+  require_s1_s2: false
+  search:
+    s1_after_r_seconds:
+    - 0.0
+    - 0.25
+    s2_after_t_seconds:
+    - -0.1
+    - 0.2
+  quality:
+    min_rpeaks: 3
+    min_successful_windows: 2
+    max_rejection_fraction: 0.5
+    min_window_rms: 0.0
+  delay:
+    estimate: true
+    apply: false
+    max_abs_seconds: 0.2
+    step_seconds: 0.005
+model:
+  name: pcg_cnn_enhanced
+  conv_channels:
+  - 32
+  - 64
+  - 128
+  kernel_sizes:
+  - 4
+  - 4
+  - 4
+  strides:
+  - 2
+  - 1
+  - 1
+  pool_kernel: 16
+  pool_output_length: 16
+  pointwise_channels: 64
+  dropout: 0.2
+  num_classes: 2
+fusion:
+  ecg_conv_channels:
+  - 8
+  - 16
+  - 16
+  ecg_kernel_sizes:
+  - 7
+  - 5
+  - 3
+  ecg_strides:
+  - 2
+  - 2
+  - 2
+  ecg_pool_output_length: 8
+  ecg_feature_dim: 32
+  head_hidden_dim: 32
+  dropout: 0.1
+training:
+  batch_size: 128
+  epochs: 25
+  lr: 0.001
+  weight_decay: 0.0001
+  optimizer: adamw
+  scheduler: reduce_on_plateau
+  scheduler_patience: 3
+  scheduler_factor: 0.5
+  early_stopping_patience: 7
+  monitor: auprc
+  class_weight: true
+  class_weight_mode: sqrt
+  weighted_sampler: false
+  val_fraction: 0.15
+  min_val_positives: 1
+  num_workers: 6
+  amp: true
+  grad_clip: 1.0
+  threshold_metric: f1
+  max_windows_per_recording: null
+  max_train_windows: null
+  stats_max_windows: 5000
+  seed: 42
+  site_weights:
+    APEX: 2.0
+    LLSB: 1.0
+    LUSB: 1.0
+    RUSB: 0.75
+evaluation:
+  bootstrap_iterations: 1000
+  bootstrap_confidence: 0.95
+  bootstrap_seed: 42
+  paired_only: true
+  min_windows_per_subject: 1
+  threshold_grid_start: 0.01
+  threshold_grid_stop: 0.99
+  threshold_grid_step: 0.01
+  site_weights:
+    APEX: 2.0
+    LLSB: 1.0
+    LUSB: 1.0
+    RUSB: 0.75
+smoke:
+  max_subjects: 8
+  epochs: 2
+  batch_size: 2
+  max_windows_per_recording: 4
+  stats_max_windows: 200

@@ -1,0 +1,213 @@
+# =============================================================================
+# ECG-guided PCG segmentation for HFrEF classification
+# -----------------------------------------------------------------------------
+# Paths may be absolute or relative to the project root.  The dataset path is
+# read from the HFREF_DATA_ROOT environment variable so that raw data is never
+# stored inside this repository.  See EXECUTION.md for Windows PowerShell
+# instructions.
+# =============================================================================
+
+project:
+  name: ecg_pcg_gating_project
+  seed: 42
+  # "auto" uses CUDA when available, otherwise CPU.
+  device: auto
+  output_dir: results
+  deterministic: true
+
+data:
+  # Set HFREF_DATA_ROOT before running, e.g.
+  #   $env:HFREF_DATA_ROOT = "C:\Users\you\hfref_data"
+  root: "${HFREF_DATA_ROOT}"
+  fallback_root: data/HFrEF_5_folds
+  external_root: "${HFREF_EXTERNAL_ROOT}"
+  cache_dir: data/cache
+
+  folds: [0, 1, 2, 3, 4]
+  sites: [APEX, LLSB, LUSB, RUSB]       # mitral, tricuspid, pulmonary, aortic
+  modalities: [ECG, PCG]
+
+  # Labels are taken from the dataset CSV (LVEF).  HFrEF is LVEF <= threshold.
+  lvef_threshold_percent: 40.0
+  label_glob: "*label*.csv"
+
+  # Basic recording checks.
+  min_duration_seconds: 10.0
+  max_duration_seconds: 90.0
+  duration_tolerance_seconds: 0.25
+  expected_ecg_fs: 500
+  expected_pcg_fs: 4000
+  require_all_sites: false
+
+# -----------------------------------------------------------------------------
+# PCG preprocessing profiles
+# -----------------------------------------------------------------------------
+# paper_haar  : original-paper-inspired profile.  Resample to 1440 Hz, 2-level
+#               Haar DWT (approximation coefficients), 1.5 s windows.  This is
+#               the profile for the main E1 vs E2 comparison.
+# hfref_2000  : dataset-paper profile.  Resample to 2000 Hz, 25-400 Hz
+#               Butterworth band-pass, no DWT, 1.28 s windows with 50 % overlap.
+# The two profiles are never mixed silently; choose one with --profile.
+# -----------------------------------------------------------------------------
+preprocessing:
+  profile: paper_haar
+  profiles:
+    paper_haar:
+      description: "Original-paper-inspired: 1440 Hz + 2-level Haar DWT + 1.5 s windows"
+      pcg_target_fs: 1440
+      pcg_bandpass_hz: [20, 400]
+      pcg_filter_order: 5
+      pcg_filter_zero_phase: true
+      dwt_enabled: true
+      dwt_wavelet: haar
+      dwt_level: 2
+      # "approximation" keeps cA2 only (length / 4).  "all" concatenates
+      # cA2, cD2 and cD1 and is provided only for sensitivity analysis.
+      dwt_keep: approximation
+      window_seconds: 1.5
+      hop_seconds: 0.75
+      normalization: train_global
+
+    hfref_2000:
+      description: "HFrEF dataset paper: 2000 Hz + 25-400 Hz band-pass + 1.28 s windows"
+      pcg_target_fs: 2000
+      pcg_bandpass_hz: [25, 400]
+      pcg_filter_order: 5
+      pcg_filter_zero_phase: true
+      dwt_enabled: false
+      dwt_wavelet: haar
+      dwt_level: 2
+      dwt_keep: approximation
+      window_seconds: 1.28
+      hop_seconds: 0.64
+      normalization: train_global
+
+  # ECG is used for gating and (optionally) for the E3 fusion branch.  R-peak
+  # detection always uses the native ECG sampling rate (500 Hz here).
+  ecg:
+    target_fs: 500
+    bandpass_hz: [5, 25]
+    # Used only by the optional E3 ECG branch; wider than the detection band.
+    fusion_bandpass_hz: [1, 40]
+    notch_hz: null
+    normalization: train_global
+
+# -----------------------------------------------------------------------------
+# ECG-guided gating
+# -----------------------------------------------------------------------------
+gating:
+  # paper_inspired : derivative + third-highest-peak initialisation, RR
+  #                  outlier re-search, T-wave equations from the paper.
+  # simple_rpeak   : Pan-Tompkins-style energy detector (robust fallback
+  #                  baseline, explicitly named as a simplified method).
+  method: paper_inspired
+  polarity: auto                  # auto | positive | negative
+  window:
+    anchor: r_peak                # r_peak | s1
+    pre_r_seconds: 0.25
+    # Only used when anchor=s1; the R-peak anchor is the primary setting.
+    pre_s1_seconds: 0.10
+    # The pipeline overrides this with the active preprocessing profile's
+    # window length so E1 and E2 always use identical durations.
+    duration_seconds: 1.5
+    max_out_of_bounds_seconds: 0.0
+  min_rr_seconds: 0.3
+  max_rr_seconds: 1.5
+  min_heart_rate_bpm: 40
+  max_heart_rate_bpm: 200
+  require_s1_s2: false
+  search:
+    # Windows are searched in the PCG envelope.  The paper states that S1/S2
+    # are searched "0.2 s after" the QRS/T markers but does not fully specify
+    # the interval length; these values are explicit implementation choices.
+    s1_after_r_seconds: [0.0, 0.25]
+    s2_after_t_seconds: [-0.10, 0.20]
+  quality:
+    min_rpeaks: 3
+    min_successful_windows: 2
+    max_rejection_fraction: 0.5
+    # Applied identically to E1 and E2 when > 0.
+    min_window_rms: 0.0
+  delay:
+    estimate: true
+    apply: false
+    max_abs_seconds: 0.2
+    step_seconds: 0.005
+
+# -----------------------------------------------------------------------------
+# Models
+# -----------------------------------------------------------------------------
+model:
+  name: pcg_cnn_config5
+  # Configuration 5 from the original paper's Table IV.
+  conv_channels: [4, 8, 16]
+  kernel_sizes: [4, 4, 4]
+  strides: [2, 1, 1]
+  # With the primary 540-sample input, kernel 16 yields exactly 16 frames.
+  pool_kernel: 16
+  pool_output_length: 16
+  pointwise_channels: 8
+  dropout: 0.0
+  num_classes: 2
+
+fusion:
+  # Small ECG branch for optional E3; this is NOT LGC2-Net.
+  ecg_conv_channels: [8, 16, 16]
+  ecg_kernel_sizes: [7, 5, 3]
+  ecg_strides: [2, 2, 2]
+  ecg_pool_output_length: 8
+  ecg_feature_dim: 32
+  head_hidden_dim: 32
+  dropout: 0.1
+
+# -----------------------------------------------------------------------------
+# Training
+# -----------------------------------------------------------------------------
+training:
+  batch_size: 128               # small CNN: larger batches amortise WDDM launch latency
+  epochs: 25
+  lr: 0.001                     # AdamW default; stable for this 1.1k-param net
+  weight_decay: 0.0001
+  optimizer: adamw
+  scheduler: reduce_on_plateau
+  scheduler_patience: 3
+  scheduler_factor: 0.5
+  early_stopping_patience: 7
+  monitor: auprc                 # auprc | loss
+  class_weight: true
+  weighted_sampler: false
+  val_fraction: 0.15
+  min_val_positives: 1
+  num_workers: 6                 # 12 logical cores; workers overlap I/O with GPU
+  amp: true
+  grad_clip: 1.0
+  threshold_metric: f1           # f1 | youden | balanced_accuracy
+  max_windows_per_recording: null
+  max_train_windows: null
+  stats_max_windows: 5000
+  seed: 42
+
+# -----------------------------------------------------------------------------
+# Evaluation
+# -----------------------------------------------------------------------------
+evaluation:
+  bootstrap_iterations: 1000
+  bootstrap_confidence: 0.95
+  bootstrap_seed: 42
+  paired_only: true              # compare E1/E2 on subjects evaluable in both
+  # Subjects with fewer windows than this are excluded from subject-level
+  # aggregation (and counted in the output).  1 keeps every subject.
+  min_windows_per_subject: 1
+  threshold_grid_start: 0.01
+  threshold_grid_stop: 0.99
+  threshold_grid_step: 0.01
+
+# -----------------------------------------------------------------------------
+# Smoke tests (used by --smoke-test)
+# -----------------------------------------------------------------------------
+smoke:
+  max_subjects: 8
+  epochs: 2
+  batch_size: 2
+  max_windows_per_recording: 4
+  stats_max_windows: 200

@@ -1,0 +1,39 @@
+{
+  "pooled_metrics_tau_0.20": {
+    "tn": 362,
+    "fp": 78,
+    "fn": 9,
+    "tp": 51,
+    "threshold": 0.2,
+    "n": 500,
+    "n_positive": 60,
+    "n_negative": 440,
+    "accuracy": 0.826,
+    "precision": 0.3953488372093023,
+    "recall_sensitivity": 0.85,
+    "specificity": 0.8227272727272728,
+    "f1": 0.5396825396825397,
+    "balanced_accuracy": 0.8363636363636364,
+    "npv": 0.9757412398921833,
+    "roc_auc": 0.8936742424242424,
+    "pr_auc": 0.543586799951406,
+    "brier": 0.07337601317300306
+  },
+  "triage_summary": {
+    "tau_low": 0.15,
+    "tau_high": 0.65,
+    "total_subjects": 500,
+    "decisive_subjects": 362,
+    "indeterminate_subjects": 138,
+    "indeterminate_percentage": 27.6,
+    "rule_in_precision": 0.6296296296296297,
+    "rule_in_tp": 17,
+    "rule_in_fp": 10,
+    "rule_out_npv": 0.9791044776119403,
+    "decisive_accuracy": 0.9530386740331491,
+    "decisive_precision": 0.6296296296296297,
+    "decisive_recall": 0.7083333333333334,
+    "decisive_specificity": 0.9704142011834319,
+    "decisive_f1": 0.6666666666666666
+  }
+}

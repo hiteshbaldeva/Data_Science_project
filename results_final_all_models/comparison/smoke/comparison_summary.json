@@ -1,0 +1,20 @@
+{
+  "comparison_name": "smoke",
+  "profile": "paper_haar",
+  "experiments": {
+    "E1": {
+      "n_subjects": 8,
+      "n_positive_subjects": 2,
+      "threshold": 0.20600000000000002,
+      "description": "ungated fixed PCG windows"
+    },
+    "E2": {
+      "n_subjects": 8,
+      "n_positive_subjects": 2,
+      "threshold": 0.23600000000000004,
+      "description": "ECG-gated PCG windows"
+    }
+  },
+  "paired_cohort": 8,
+  "note": "Paired comparison uses subjects evaluable in all experiments. External data are never included here."
+}

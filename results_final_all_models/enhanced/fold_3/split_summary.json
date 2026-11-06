@@ -1,0 +1,12 @@
+{
+  "test_fold": 3,
+  "n_train_subjects": 340,
+  "n_val_subjects": 60,
+  "n_test_subjects": 100,
+  "n_train_windows": 46669,
+  "n_val_windows": 8198,
+  "n_test_windows": 13513,
+  "val_positive_subjects": 7,
+  "val_negative_subjects": 53,
+  "reason": "subject-level holdout from training folds"
+}

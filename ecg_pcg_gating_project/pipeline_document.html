@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Complete Preprocessing and Multimodal Fusion Pipeline</title>
+<style>
+  @page {
+    size: A4;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1a202c;
+    line-height: 1.5;
+    font-size: 10.5pt;
+    margin: 0;
+    padding: 0;
+  }
+  .header-box {
+    background: linear-gradient(135deg, #0d3b66 0%, #00509d 100%);
+    color: white;
+    padding: 22px 24px;
+    border-radius: 8px;
+    margin-bottom: 22px;
+  }
+  .header-box h1 {
+    margin: 0 0 6px 0;
+    font-size: 18pt;
+    letter-spacing: -0.3px;
+  }
+  .header-box p {
+    margin: 0;
+    font-size: 11pt;
+    opacity: 0.92;
+  }
+  .badge-row {
+    margin-top: 10px;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.22);
+    color: white;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  h2 {
+    color: #00509d;
+    font-size: 13pt;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 5px;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+  }
+  h3 {
+    color: #2b6cb0;
+    font-size: 11.5pt;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+  }
+  p, ul {
+    margin-top: 4px;
+    margin-bottom: 8px;
+  }
+  ul {
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 3px;
+  }
+  .stage-card {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #00509d;
+    padding: 12px 16px;
+    border-radius: 5px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+  }
+  .stage-title {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 11.5pt;
+    margin-bottom: 6px;
+  }
+  .flow-box {
+    background: #ffffff;
+    border: 1px dashed #94a3b8;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 8.5pt;
+    color: #0f172a;
+    line-height: 1.45;
+    margin: 10px 0;
+    white-space: pre;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 7px 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+  .highlight-cell {
+    background-color: #ecfdf5 !important;
+    font-weight: 700;
+    color: #065f46;
+  }
+  .formula-box {
+    background: #edf2f7;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9pt;
+    margin: 6px 0;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-box">
+  <h1>Complete Preprocessing & Multimodal Fusion Pipeline</h1>
+  <p>Technical Reference: Signal Conditioning, ECG-Guided Physiological Gating, Time-Frequency Transformation, and Hierarchical Cross-Attention Fusion</p>
+  <div class="badge-row">
+    <span class="badge">EKO DUO Synchronous Signals</span>
+    <span class="badge">4 Auscultation Sites</span>
+    <span class="badge">Cross-Attention (EMAT)</span>
+    <span class="badge">Cell Press Patterns Benchmark</span>
+  </div>
+</div>
+
+<h2>1. High-Level Architecture Overview</h2>
+<p>
+  The pipeline takes raw dual-sensor recordings from an <strong>EKO DUO ECG+ digital stethoscope</strong> placed sequentially at four chest auscultation locations (Mitral/APEX, Tricuspid/LLSB, Pulmonary/LUSB, Aortic/RUSB) and transforms them into patient-level risk predictions for <strong>Heart Failure with Reduced Ejection Fraction (HFrEF, LVEF &le; 40%)</strong>.
+</p>
+
+<div class="flow-box">
+Raw Stethoscope Signals (30s Synchronous ECG + PCG across 4 Auscultation Sites)
+  ├── 1. Continuous Signal Preprocessing (Resampling + Zero-Phase Butterworth + Mains Notch Filter)
+  ├── 2. Physiological Gating (Pan-Tompkins R-Peak Detection -> Anchored [t_R - 0.25s, t_R + 1.25s] Slices)
+  ├── 3. Feature Representations (PCG -> 32-Band Log-Mel 2D Spectrogram; ECG -> Normalized 1D Vector)
+  ├── 4. Dual-Branch Encoders (PCG 2D ConvNet + ECG 1D Conv-Residual Encoders -> Latent Sequences)
+  ├── 5. Level 1 Fusion: Inter-Modality Cross-Attention (Q_ECG x K/V_PCG -> Detects EMAT Timing Delay)
+  ├── 6. Level 2 Fusion: Inter-Site Spatial Fusion (Multi-Head Self-Attention across APEX, LLSB, LUSB, RUSB)
+  └── 7. Feature-Decision Double-Level Multi-Heads (6 Simultaneous Supervisions -> Ensembled Prediction)
+</div>
+
+<h2>2. Stage-by-Stage Detailed Preprocessing</h2>
+
+<div class="stage-card">
+  <div class="stage-title">Stage 1: Continuous Full-Recording Filtering & Caching</div>
+  <p>Raw 30-second recordings are processed as continuous waveforms before any window slicing occurs:</p>
+  <ul>
+    <li><strong>Acoustic PCG Stream:</strong>
+      <ul>
+        <li><strong>Polyphase Rational Resampling:</strong> Resampled to <strong>1440 Hz</strong> using polyphase filtering (<code>scipy.signal.resample_poly</code>) to avoid phase artifacts.</li>
+        <li><strong>Zero-Phase Butterworth Bandpass:</strong> 5th-order filter passing <strong>20 Hz to 400 Hz</strong> using forward-backward filtering (<code>sosfiltfilt</code>). This strips respiratory breath sounds (&lt;20 Hz) and ambient room hiss (&gt;400 Hz) with zero phase distortion.</li>
+      </ul>
+    </li>
+    <li><strong>Electrical ECG Stream:</strong>
+      <ul>
+        <li><strong>Sampling Rate:</strong> Maintained at <strong>500 Hz</strong> (standard clinical tracing resolution).</li>
+        <li><strong>Mains Interference Filter:</strong> IIR notch filter at <strong>50 Hz</strong> (Q = 30) removes powerline hum.</li>
+        <li><strong>Baseline Wander Removal:</strong> 3rd-order Butterworth bandpass filter (0.5 Hz to 40 Hz) removes respiration-induced baseline sway for clean R-peak detection.</li>
+      </ul>
+    </li>
+    <li><strong>Flat Memory-Mapped Cache:</strong> Signals are stored sequentially in <code>pcg.npy</code> and <code>ecg.npy</code>. Metadata records per-recording coordinates (<code>pcg_offset</code>, <code>ecg_offset</code>), enabling sub-millisecond retrieval.</li>
+  </ul>
+</div>
+
+<div class="stage-card">
+  <div class="stage-title">Stage 2: ECG-Guided Physiological Gating</div>
+  <p>Instead of blind time-window slicing that chops cardiac cycles arbitrarily, the synchronized ECG acts as a physiological clock:</p>
+  <ul>
+    <li><strong>R-Peak Detection:</strong> Evaluates the 500 Hz lead-I ECG via derivative and moving-average integration (Pan-Tompkins) to locate all ventricular depolarization peaks (t<sub>R</sub>).</li>
+    <li><strong>Anchored Window Slicing:</strong>
+      <div class="formula-box">Window Bounds = [t<sub>R</sub> - 0.25 s, &nbsp; t<sub>R</sub> + 1.25 s] &nbsp;&nbsp; (Fixed Duration: 1.50 seconds)</div>
+      <ul>
+        <li><strong>PCG Window Slice:</strong> Exactly <strong>2,160 samples</strong> (1.50 s &times; 1440 Hz).</li>
+        <li><strong>ECG Window Slice:</strong> Exactly <strong>750 samples</strong> (1.50 s &times; 500 Hz).</li>
+      </ul>
+    </li>
+    <li><strong>Acoustic Quality Control:</strong> Evaluates the analytic envelope (Hilbert transform) to detect S1 and S2 heart sounds. Low-RMS windows (&lt;0.005) or clipped microphone friction artifacts are discarded.</li>
+  </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="stage-card">
+  <div class="stage-title">Stage 3: Window Feature Representation per Site</div>
+  <p>Each valid cardiac window is converted into optimal feature spaces for deep learning:</p>
+  <ul>
+    <li><strong>PCG Stream &rarr; 32-Band Time-Frequency Log-Mel Spectrogram:</strong>
+      <ul>
+        <li><strong>STFT Analysis:</strong> 128-point Hann window with a 64-sample hop size (50% overlap).</li>
+        <li><strong>Mel Filterbank:</strong> 32 triangular filterbanks spanning <strong>20 Hz to 700 Hz</strong>.</li>
+        <li><strong>Logarithmic Dynamic Compression:</strong> <code>Log-Mel = log(max(Mel, 1e-6))</code>.</li>
+        <li><strong>Per-Spectrogram Standardization:</strong> Normalized to zero mean and unit variance.</li>
+        <li><strong>Output Tensor Shape:</strong> <code>(1, 32, 35)</code> &mdash; 1 channel, 32 frequency bins, 35 time frames.</li>
+      </ul>
+    </li>
+    <li><strong>ECG Stream &rarr; 1D Temporal Standardization:</strong>
+      <ul>
+        <li>The 750-sample window is standardized: <code>(x - mean) / std</code>.</li>
+        <li><strong>Output Tensor Shape:</strong> <code>(1, 750)</code> &mdash; Preserves sharp QRS spikes and ST-T segments.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<h2>3. Deep Multimodal & Multi-Site Fusion Mechanics</h2>
+
+<div class="stage-card">
+  <div class="stage-title">Level 1: Inter-Modality Cross-Attention (CCF / EMAT Detection)</div>
+  <p>
+    In HFrEF, ventricular remodeling delays mechanical pressure buildup, causing prolonged <strong>Electromechanical Activation Time (EMAT)</strong> &mdash; the latency between the electrical Q-wave and the acoustic mitral S1 closure.
+  </p>
+  <ul>
+    <li><strong>PCG Encoder:</strong> 3 Conv2d stages (channels 32 &rarr; 64 &rarr; 128) with BatchNorm, MaxPool2d, and AdaptiveAvgPool2d &rarr; yields sequence <code>(B, 8, 128)</code>.</li>
+    <li><strong>ECG Encoder:</strong> 3 Conv1d stages (kernels 15, 7, 5; channels 32 &rarr; 64 &rarr; 128) with BatchNorm, MaxPool1d, and AdaptiveAvgPool1d &rarr; yields sequence <code>(B, 8, 128)</code>.</li>
+    <li><strong>Bidirectional Multi-Head Cross-Attention:</strong>
+      <div class="formula-box">
+        A<sub>ECG&rarr;PCG</sub> = softmax(Q<sub>ECG</sub> &middot; K<sub>PCG</sub><sup>T</sup> / &radic;d) &middot; V<sub>PCG</sub><br/>
+        A<sub>PCG&rarr;ECG</sub> = softmax(Q<sub>PCG</sub> &middot; K<sub>ECG</sub><sup>T</sup> / &radic;d) &middot; V<sub>ECG</sub>
+      </div>
+      The network queries the exact temporal correlation between electrical spikes and acoustic heart sounds.
+    </li>
+    <li><strong>Fused Site Embedding:</strong> Sequence is mean-pooled and projected &rarr; outputs 128-dimensional site vector: <code>v<sub>site</sub> &isin; &reals;<sup>128</sup></code> (for APEX, LLSB, LUSB, and RUSB).</li>
+  </ul>
+</div>
+
+<div class="stage-card">
+  <div class="stage-title">Level 2: 4-Site Auscultation Spatial Fusion (CSB)</div>
+  <p>Because stethoscope recordings are collected sequentially across chest sites, raw signals cannot be aligned chronologically across locations. The network fuses them at the high-level semantic representation level:</p>
+  <ul>
+    <li>Stack 4 site embeddings: <code>[v<sub>APEX</sub>, v<sub>LLSB</sub>, v<sub>LUSB</sub>, v<sub>RUSB</sub>] &rarr; (B, 4, 128)</code>.</li>
+    <li><strong>Inter-Site Multi-Head Self-Attention:</strong> Models spatial correlations across the four anatomical valves.</li>
+    <li><strong>Noise Suppression:</strong> If one site (e.g. APEX) contains local rubbing noise, the model cross-references the clean Pulmonary, Aortic, and Tricuspid vectors, <strong>preventing false alarms</strong>.</li>
+    <li>Outputs the Channel-Shared Embedding: <code>v<sub>CS</sub> &isin; &reals;<sup>128</sup></code>.</li>
+  </ul>
+</div>
+
+<div class="stage-card">
+  <div class="stage-title">Level 3: Feature-Decision Double-Level Multi-Branch Heads</div>
+  <ul>
+    <li><strong>Individual Site Heads:</strong> 4 linear classifiers for APEX, LLSB, LUSB, and RUSB (<code>P<sub>site</sub></code>).</li>
+    <li><strong>Shared Head:</strong> Evaluates inter-site representation (<code>P<sub>CS</sub></code>).</li>
+    <li><strong>Joint Multi-Branch Head:</strong> Evaluates concatenated multi-branch vector (<code>P<sub>joint</sub></code>).</li>
+    <li><strong>Deep Auxiliary Supervision:</strong> Total loss supervises all 6 heads simultaneously:
+      <div class="formula-box">&Lscr;<sub>total</sub> = &Lscr;<sub>APEX</sub> + &Lscr;<sub>LLSB</sub> + &Lscr;<sub>LUSB</sub> + &Lscr;<sub>RUSB</sub> + &Lscr;<sub>CS</sub> + &Lscr;<sub>joint</sub></div>
+    </li>
+    <li><strong>Ensemble Decision:</strong> Final patient probability is the average of all 6 heads:
+      <div class="formula-box">P<sub>final</sub> = (P<sub>APEX</sub> + P<sub>LLSB</sub> + P<sub>LUSB</sub> + P<sub>RUSB</sub> + P<sub>CS</sub> + P<sub>joint</sub>) / 6</div>
+    </li>
+  </ul>
+</div>
+
+<h2>4. Method Comparison Matrix</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pipeline / Model</th>
+      <th>Inputs</th>
+      <th>Acoustic Feature</th>
+      <th>Cross-Attention</th>
+      <th>Multi-Site Fusion</th>
+      <th>AUROC</th>
+      <th>Key Results</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>E1 Baseline</strong></td>
+      <td>PCG Only</td>
+      <td>Haar DWT (cA<sub>2</sub>)</td>
+      <td>No</td>
+      <td>Post-hoc average</td>
+      <td>0.584</td>
+      <td>Severe false alarms (331 / 440 FP)</td>
+    </tr>
+    <tr>
+      <td><strong>E2 Baseline</strong></td>
+      <td>PCG (Gated)</td>
+      <td>Haar DWT (cA<sub>2</sub>)</td>
+      <td>No</td>
+      <td>Post-hoc average</td>
+      <td>0.581</td>
+      <td>Severely underfitting (1.1k params)</td>
+    </tr>
+    <tr>
+      <td><strong>E3 Fusion</strong></td>
+      <td>ECG + PCG</td>
+      <td>Haar DWT + 1D ECG</td>
+      <td>No (Concat)</td>
+      <td>Post-hoc average</td>
+      <td>0.618</td>
+      <td>High Recall (80%) but poor precision</td>
+    </tr>
+    <tr>
+      <td><strong>Log-Mel 2D CNN</strong></td>
+      <td>PCG (Gated)</td>
+      <td>32-Band Log-Mel 2D</td>
+      <td>No</td>
+      <td>Post-hoc average</td>
+      <td>0.780</td>
+      <td>Drastic FP reduction (only 24 FP)</td>
+    </tr>
+    <tr class="highlight-cell">
+      <td><strong>Hierarchical Cross-Attn</strong></td>
+      <td>4-Site ECG+PCG</td>
+      <td>Log-Mel + 1D ECG</td>
+      <td>Yes (EMAT CCF)</td>
+      <td>Channel-Shared Attn</td>
+      <td><strong>0.894</strong></td>
+      <td><strong>85.0% Recall + 85.2% Accuracy (&tau;=0.23)</strong><br/><strong>100% Sensitivity on External Cohort</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

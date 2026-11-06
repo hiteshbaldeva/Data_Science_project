@@ -1,0 +1,24 @@
+{
+  "threshold": 0.13,
+  "metrics": {
+    "tn": 85,
+    "fp": 3,
+    "fn": 5,
+    "tp": 7,
+    "threshold": 0.13,
+    "n": 100,
+    "n_positive": 12,
+    "n_negative": 88,
+    "accuracy": 0.92,
+    "precision": 0.7,
+    "recall_sensitivity": 0.5833333333333334,
+    "specificity": 0.9659090909090909,
+    "f1": 0.6363636363636364,
+    "balanced_accuracy": 0.7746212121212122,
+    "npv": 0.9444444444444444,
+    "roc_auc": 0.8664772727272728,
+    "pr_auc": 0.6971262160778291,
+    "brier": 0.09310153370426616
+  },
+  "best_epoch": 6
+}

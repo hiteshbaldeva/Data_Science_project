@@ -1,0 +1,8 @@
+Model_Technique,Modality,Auscultation_Sites,Parameters,AUROC,AUPRC,Accuracy_pct,Sensitivity_Recall_pct,Specificity_pct,False_Positives,False_Negatives
+T1: Ungated PCG Baseline (E1),PCG Only (1D Haar),APEX Only,1150,0.584,0.165,32.4%,86.7%,24.8%,331 / 440,8 / 60
+T2: ECG-Gated PCG Baseline (E2),ECG-Gated PCG (1D Haar),APEX Only,1150,0.581,0.164,37.8%,88.3%,30.9%,302 / 440,7 / 60
+T3: Capacity + APEX Weighting (E2-Enhanced),ECG-Gated PCG (1D Haar),APEX-Weighted,52194,0.627,0.201,56.6%,43.3%,58.4%,183 / 440,34 / 60
+T4: Log-Mel 2D CNN (E3),Log-Mel PCG Spectrogram (2D),APEX Only,56674,0.780,0.384,87.2%,23.3%,96.1%,24 / 440,46 / 60
+T5: Multimodal Cross-Attention (tau=0.50),2D Log-Mel PCG + 1D ECG,4 Sites (Cross-Attn),979145,0.894,0.544,91.8%,36.7%,99.3%,3 / 440,38 / 60
+T5: Multimodal Cross-Attention (tau=0.23 Sweet Spot),2D Log-Mel PCG + 1D ECG,4 Sites (Cross-Attn),979145,0.894,0.544,85.2%,85.0%,85.2%,65 / 440,9 / 60
+T5: External Test Set (Liyuan 120 Subjects),2D Log-Mel PCG + 1D ECG,4 Sites (Cross-Attn),979145,0.990,0.850,83.3%,100.0%,82.6%,20 / 115,0 / 5

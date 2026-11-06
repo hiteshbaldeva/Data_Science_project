@@ -1,0 +1,6 @@
+fold,experiment,profile,model_type,n_parameters,best_epoch,threshold,threshold_metric,threshold_score,metric,score,grid_size,criterion
+0,e2,paper_haar,pcg,52194,8,0.27,f1,0.2857142857142857,f1,0.2857142857142857,99,f1
+1,e2,paper_haar,pcg,52194,9,0.27,f1,0.208955223880597,f1,0.208955223880597,99,f1
+2,e2,paper_haar,pcg,52194,1,0.33,f1,0.42857142857142855,f1,0.42857142857142855,99,f1
+3,e2,paper_haar,pcg,52194,6,0.28,f1,0.2222222222222222,f1,0.2222222222222222,99,f1
+4,e2,paper_haar,pcg,52194,8,0.3,f1,0.22950819672131148,f1,0.22950819672131148,99,f1

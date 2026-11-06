@@ -1,0 +1,25 @@
+{
+  "fold": 0,
+  "best_epoch": 6,
+  "best_val_auroc": 1.0,
+  "metrics_tau_0.20": {
+    "tn": 72,
+    "fp": 16,
+    "fn": 1,
+    "tp": 11,
+    "threshold": 0.2,
+    "n": 100,
+    "n_positive": 12,
+    "n_negative": 88,
+    "accuracy": 0.83,
+    "precision": 0.4074074074074074,
+    "recall_sensitivity": 0.9166666666666666,
+    "specificity": 0.8181818181818182,
+    "f1": 0.5641025641025641,
+    "balanced_accuracy": 0.8674242424242424,
+    "npv": 0.9863013698630136,
+    "roc_auc": 0.9166666666666666,
+    "pr_auc": 0.49589116599986166,
+    "brier": 0.08293048269254699
+  }
+}

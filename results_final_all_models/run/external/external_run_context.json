@@ -1,0 +1,54 @@
+{
+  "checkpoints": [
+    "C:\\Users\\Hitesh m\\OneDrive\\Desktop\\new_ds_project\\ecg_pcg_gating_project\\results\\paper_haar\\e1\\run\\fold_0\\checkpoint.pt",
+    "C:\\Users\\Hitesh m\\OneDrive\\Desktop\\new_ds_project\\ecg_pcg_gating_project\\results\\paper_haar\\e1\\run\\fold_1\\checkpoint.pt",
+    "C:\\Users\\Hitesh m\\OneDrive\\Desktop\\new_ds_project\\ecg_pcg_gating_project\\results\\paper_haar\\e1\\run\\fold_2\\checkpoint.pt",
+    "C:\\Users\\Hitesh m\\OneDrive\\Desktop\\new_ds_project\\ecg_pcg_gating_project\\results\\paper_haar\\e1\\run\\fold_3\\checkpoint.pt",
+    "C:\\Users\\Hitesh m\\OneDrive\\Desktop\\new_ds_project\\ecg_pcg_gating_project\\results\\paper_haar\\e1\\run\\fold_4\\checkpoint.pt"
+  ],
+  "window_report": {
+    "experiment": "e1",
+    "profile": "paper_haar",
+    "window_seconds": 1.5,
+    "hop_seconds": 0.75,
+    "window_samples": 2160,
+    "n_recordings_total": 480,
+    "n_recordings_used": 480,
+    "n_recordings_skipped": 0,
+    "n_windows": 18720,
+    "skipped": [],
+    "quality_rejections": 0,
+    "gating_rejections": 0,
+    "n_subjects_with_windows": 120,
+    "label_counts": {
+      "positive_windows": 780,
+      "negative_windows": 17940
+    },
+    "subjects_per_fold": {}
+  },
+  "external_index": {
+    "root": "C:\\Users\\Hitesh m\\Downloads\\HFrEF_community_scenario_test_set\\HFrEF_community_scenario_test_set",
+    "external": true,
+    "n_pairs": 480,
+    "n_subjects": 120,
+    "labels": {
+      "positive": 5,
+      "negative": 115,
+      "labelled": 120
+    },
+    "folds": {
+      "unknown": {
+        "subjects": 120,
+        "positive": 5,
+        "negative": 115
+      }
+    },
+    "n_unpaired": 0,
+    "n_unparsed": 0,
+    "label_sources": [
+      "C:\\Users\\Hitesh m\\Downloads\\HFrEF_community_scenario_test_set\\HFrEF_community_scenario_test_set\\test_set_label.csv"
+    ],
+    "warnings": []
+  },
+  "note": "External evaluation is a limited generalisation check. No external data were used for training or threshold selection."
+}

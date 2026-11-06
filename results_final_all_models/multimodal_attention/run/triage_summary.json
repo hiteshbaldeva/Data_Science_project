@@ -1,0 +1,17 @@
+{
+  "tau_low": 0.15,
+  "tau_high": 0.65,
+  "total_subjects": 500,
+  "decisive_subjects": 362,
+  "indeterminate_subjects": 138,
+  "indeterminate_percentage": 27.6,
+  "rule_in_precision": 0.6296296296296297,
+  "rule_in_tp": 17,
+  "rule_in_fp": 10,
+  "rule_out_npv": 0.9791044776119403,
+  "decisive_accuracy": 0.9530386740331491,
+  "decisive_precision": 0.6296296296296297,
+  "decisive_recall": 0.7083333333333334,
+  "decisive_specificity": 0.9704142011834319,
+  "decisive_f1": 0.6666666666666666
+}

@@ -1,0 +1,28 @@
+# Python dependencies for the ECG-guided PCG HFrEF project.
+#
+# Target interpreter: CPython 3.10 or 3.11 on Windows 10/11.
+# PyTorch is listed without an index URL so that a CPU wheel is installed by
+# default.  For an NVIDIA GPU (RTX 2050), install the CUDA build first using the
+# command selector at https://pytorch.org/get-started/locally/ and then install
+# the remaining requirements with:
+#
+#   pip install -r requirements.txt
+#
+# Minimum versions are intentionally loose; the project is tested with recent
+# stable releases.  If a resolver conflict appears on an old system, install
+# PyTorch first and re-run this file.
+
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+scikit-learn>=1.3
+torch>=2.0
+soundfile>=0.12
+PyWavelets>=1.4
+matplotlib>=3.7
+seaborn>=0.12
+tqdm>=4.65
+PyYAML>=6.0
+
+# Development / verification
+pytest>=7.4

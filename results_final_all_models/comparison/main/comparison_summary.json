@@ -1,0 +1,20 @@
+{
+  "comparison_name": "main",
+  "profile": "paper_haar",
+  "experiments": {
+    "E1": {
+      "n_subjects": 500,
+      "n_positive_subjects": 60,
+      "threshold": 0.47000000000000003,
+      "description": "ungated fixed PCG windows"
+    },
+    "E2": {
+      "n_subjects": 500,
+      "n_positive_subjects": 60,
+      "threshold": 0.488,
+      "description": "ECG-gated PCG windows"
+    }
+  },
+  "paired_cohort": 500,
+  "note": "Paired comparison uses subjects evaluable in all experiments. External data are never included here."
+}
